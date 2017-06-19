@@ -1,5 +1,6 @@
 import os
 import scipy.misc
+import logging
 
 import numpy as np
 import tensorflow as tf
@@ -38,7 +39,7 @@ def main(_):
     if not os.path.exists(FLAGS.sample_directory):
         os.makedirs(FLAGS.sample_directory)
 
-    run_configuration = tf.ConfigProto(device_count={'GPU':0})
+    run_configuration = tf.ConfigProto()
     run_configuration.gpu_options.allow_growth=True
 
     with tf.Session(config=run_configuration) as session:
