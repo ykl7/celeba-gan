@@ -27,7 +27,8 @@ flags.DEFINE_boolean("visualize", False, "True for visualizing, False for nothin
 FLAGS = flags.FLAGS
 
 def main(_):
-    pp.pprint(flags.FLAGS.__flags)
+    logging.basicConfig(filename='./run.log', filemode="a+", format='%(asctime)s %(message)s', level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
+    logging.debug(pp.pprint(flags.FLAGS.__flags))
     if FLAGS.input_image_width is None:
         FLAGS.input_image_width = FLAGS.input_image_height
     if FLAGS.output_image_width is None:

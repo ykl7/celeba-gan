@@ -13,6 +13,8 @@ import numpy as np
 from operations import *
 from utils import *
 
+logging.basicConfig(filename='./dcgan.log', filemode="a+", format='%(asctime)s %(message)s', level=logging.DEBUG, datefmt='%d/%m/%Y %I:%M:%S %p')
+
 def convolution_same_size_output(size, stride):
   return int(math.ceil(float(size) / float(stride)))
 
@@ -80,17 +82,17 @@ class DCGAN (object):
         self.saver.save(self.session, os.path.join(checkpoint_directory, model_name), global_step=step)
 
     def load(self, checkpoint_directory):
-        print("Reading checkpoints")
+        logging.debug("Reading checkpoints")
         checkpoint_directory = os.path.join(checkpoint_directory, self.model_directory)
         checkpoint = tf.train.get_checkpoint_state(checkpoint_directory)
         if checkpoint and checkpoint.model_checkpoint_path:
             checkpoint_name = os.path.basename(checkpoint.model_checkpoint_path)
             self.saver.restore(self.session, os.path.join(checkpoint_directory, checkpoint_name))
             counter = int(next(re.finditer("(\d+)(?!.*\d)",checkpoint_name)).group(0))
-            print("Success finding {}".format(checkpoint_name))
+            logging.debug("Success finding {}".format(checkpoint_name))
             return True, counter
         else:
-            print("Failed to find checkpoint")
+            logging.debug("Failed to find checkpoint")
             return False, 0
 
     def discriminator(self, image, y=None, reuse=False):
@@ -233,9 +235,9 @@ class DCGAN (object):
         load_success, checkpoint_counter = self.load(self.checkpoint_directory)
         if load_success:
             counter = checkpoint_counter
-            print("Loaded checkpoint")
+            logging.debug("Loaded checkpoint")
         else:
-            print("Failed in loading")
+            logging.debug("Failed in loading")
 
         for epoch in xrange(config.epoch):
             # Server data path
@@ -271,7 +273,7 @@ class DCGAN (object):
             errG = self.gen_loss.eval({self.z: batch_z})
 
             counter += 1
-            print("Epoch: [%2d] [%4d/%4d] time: %4.4f, dis_loss: %.8f, gen_loss: %.8f" % (epoch, idx, batch_idxs, time.time() - start_time, errD_fake+errD_real, errG))
+            logging.debug("Epoch: [%2d] [%4d/%4d] time: %4.4f, dis_loss: %.8f, gen_loss: %.8f" % (epoch, idx, batch_idxs, time.time() - start_time, errD_fake+errD_real, errG))
             
             if np.mod(counter, 100) == 1:
                 try:
@@ -285,9 +287,9 @@ class DCGAN (object):
                     manifold_weight = int(np.floor(np.sqrt(samples.shape[0])))
                     save_images(samples, [manifold_height, manifold_weight],
                         './{}/train_{:02d}_{:04d}.png'.format(config.sample_directory, epoch, idx))
-                    print("[Sample] dis_loss: %.8f, gen_loss: %.8f" % (dis_loss, gen_loss)) 
+                    logging.debug("[Sample] dis_loss: %.8f, gen_loss: %.8f" % (dis_loss, gen_loss)) 
                 except:
-                    print("Error in one picture")
+                    logging.debug("Error in one picture")
 
             if np.mod(counter, 500) == 2:
                 self.save(config.checkpoint_directory, counter)
