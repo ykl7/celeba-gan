@@ -27,7 +27,7 @@ def get_image(image_path, input_height, input_width, resize_height=64, resize_wi
     return transform(image, input_height, input_width, resize_height, resize_width, crop)
 
 def save_images(images, size, image_path):
-  return imsave(inverse_transform(images), size, image_path)
+    return imsave(inverse_transform(images), size, image_path)
 
 def imread(path, grayscale = False):
     if (grayscale):
@@ -145,7 +145,7 @@ def to_json(output_path, *layers):
         layer_f.write(" ".join(lines.replace("'","").split()))
 
 def make_gif(images, fname, duration=2, true_image=False):
-  import moviepy.editor as mpy
+    import moviepy.editor as mpy
 
     def make_frame(t):
         try:

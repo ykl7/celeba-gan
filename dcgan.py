@@ -1,3 +1,7 @@
+from __future__ import division
+from six.moves import xrange
+from glob import glob
+
 import os
 import time
 import re
@@ -5,10 +9,6 @@ import math
 
 import tensorflow as tf
 import numpy as np
-
-from six.moves import xrange
-from glob import glob
-from __future__ import division
 
 from operations import *
 from utils import *
@@ -39,20 +39,21 @@ class DCGAN (object):
         self.gen_units_ful_con_layer = gen_units_ful_con_layer
         self.dis_units_ful_con_layer = dis_units_ful_con_layer
 
-        self.dis_bn1 = batch_norm(name='dis_bn1')
-        self.dis_bn2 = batch_norm(name='dis_bn2')
+        self.dis_bn1 = Batch_Normalization(name='dis_bn1')
+        self.dis_bn2 = Batch_Normalization(name='dis_bn2')
 
         if not self.y_dim:
-            self.dis_bn3 = batch_norm(name='dis_bn3')
+            self.dis_bn3 = Batch_Normalization(name='dis_bn3')
 
-        self.gen_bn0 = batch_norm(name='gen_bn0')
-        self.gen_bn1 = batch_norm(name='gen_bn1')
-        self.gen_bn2 = batch_norm(name='gen_bn2')
+        self.gen_bn0 = Batch_Normalization(name='gen_bn0')
+        self.gen_bn1 = Batch_Normalization(name='gen_bn1')
+        self.gen_bn2 = Batch_Normalization(name='gen_bn2')
 
         if not self.y_dim:
-            self.gen_bn3 = batch_norm(name='gen_bn3')
+            self.gen_bn3 = Batch_Normalization(name='gen_bn3')
 
-        self.data = glob(os.path.join("./data", self.dataset, self.input_fname_pattern))
+        self.dataset = dataset
+        self.data = glob(os.path.join("./data", self.dataset, self.input_file_pattern))
         self.checkpoint_directory = checkpoint_directory
 
         imreadImg = imread(self.data[0]);
@@ -96,9 +97,9 @@ class DCGAN (object):
                 scope.reuse_variables()
             if not self.y_dim:
                 h0 = leaky_relu(conv2d(image, self.dis_filters_conv1, name='dis_h0_conv'))
-                h1 = leaky_relu(self.d_bn1(conv2d(h0, self.dis_filters_conv1*2, name='dis_h1_conv')))
-                h2 = leaky_relu(self.d_bn2(conv2d(h1, self.dis_filters_conv1*4, name='dis_h2_conv')))
-                h3 = leaky_relu(self.d_bn3(conv2d(h2, self.dis_filters_conv1*8, name='dis_h3_conv')))
+                h1 = leaky_relu(self.dis_bn1(conv2d(h0, self.dis_filters_conv1*2, name='dis_h1_conv')))
+                h2 = leaky_relu(self.dis_bn2(conv2d(h1, self.dis_filters_conv1*4, name='dis_h2_conv')))
+                h3 = leaky_relu(self.dis_bn3(conv2d(h2, self.dis_filters_conv1*8, name='dis_h3_conv')))
                 h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'dis_h3_lin')
                 return tf.nn.sigmoid(h4), h4
             else:
@@ -106,10 +107,10 @@ class DCGAN (object):
                 x = concatenate_conditioning_vector(image, yb)
                 h0 = leaky_relu(conv2d(x, self.image_color_dim + self.y_dim, name='dis_h0_conv'))
                 h0 = concatenate_conditioning_vector(h0, yb)
-                h1 = leaky_relu(self.d_bn1(conv2d(h0, self.dis_filters_conv1 + self.y_dim, name='dis_h1_conv')))
+                h1 = leaky_relu(self.dis_bn1(conv2d(h0, self.dis_filters_conv1 + self.y_dim, name='dis_h1_conv')))
                 h1 = tf.reshape(h1, [self.batch_size, -1])      
                 h1 = concatenate([h1, y], 1)
-                h2 = leaky_relu(self.d_bn2(linear(h1, self.dis_units_ful_con_layer, 'dis_h2_lin')))
+                h2 = leaky_relu(self.dis_bn2(linear(h1, self.dis_units_ful_con_layer, 'dis_h2_lin')))
                 h2 = concatenate([h2, y], 1)
                 h3 = linear(h2, 1, 'dis_h3_lin')
                 return tf.nn.sigmoid(h3), h3
@@ -171,12 +172,12 @@ class DCGAN (object):
 
         if self.y_dim:
             self.G = self.generator(self.z, self.y)
-            self.D, self.D_logits = self.discriminator(inputs, self.y, reuse=False)
+            self.D, self.D_logits = self.discriminator(real_images, self.y, reuse=False)
             self.sampler = self.sampler(self.z, self.y)
-            self.D, self.D_logits = self.discriminator(inputs, self.y, reuse=False)
+            self.D, self.D_logits = self.discriminator(real_images, self.y, reuse=False)
         else:
             self.G = self.generator(self.z)
-            self.D, self.D_logits = self.discriminator(inputs)
+            self.D, self.D_logits = self.discriminator(real_images)
             self.sampler = self.sampler(self.z)
             self.D_, self.D_logits_ = self.discriminator(self.G, reuse=True)
 
@@ -184,7 +185,7 @@ class DCGAN (object):
         self.summation_D_ = histogram_summary("D_", self.D_)
         self.summation_G = image_summary("G", self.G)
 
-        def cross_entropy_sigmoid_with_logits_mapping():
+        def cross_entropy_sigmoid_with_logits_mapping(x, y):
             try:
                 return tf.nn.sigmoid_cross_entropy_with_logits(logits=x, labels=y)
             except:
