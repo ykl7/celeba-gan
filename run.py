@@ -38,9 +38,9 @@ def main(_):
         os.makedirs(FLAGS.sample_directory)
 
     run_configuration = tf.ConfigProto()
-    run_config.gpu_options.allow_growth=True
+    run_configuration.gpu_options.allow_growth=True
 
-    with tf.Session(config=run_config) as session:
+    with tf.Session(config=run_configuration) as session:
         dcgan = DCGAN(sess, input_width=FLAGS.input_image_width, input_height=FLAGS.input_image_height, output_width=FLAGS.output_image_width,
             output_height=FLAGS.output_image_height, batch_size=FLAGS.batch_size, sample_num=FLAGS.batch_size, dataset_name=FLAGS.dataset,
             input_fname_pattern=FLAGS.input_file_pattern, crop=FLAGS.crop, checkpoint_dir=FLAGS.checkpoint_directory, sample_dir=FLAGS.sample_directory)
