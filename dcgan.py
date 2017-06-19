@@ -287,4 +287,43 @@ class DCGAN (object):
             if np.mod(counter, 500) == 2:
                 self.save(config.checkpoint_directory, counter)
 
+    # similar to generator
+    def sampler(self, z, y=None):
+        with tf.variable_scope("generator") as scope:
+            scope.reuse_variables()
+
+            if not self.y_dim:
+                s_h, s_w = self.output_image_height, self.output_image_width
+                s_h2, s_w2 = convolution_same_size_output(s_h, 2), convolution_same_size_output(s_w, 2)
+                s_h4, s_w4 = convolution_same_size_output(s_h2, 2), convolution_same_size_output(s_w2, 2)
+                s_h8, s_w8 = convolution_same_size_output(s_h4, 2), convolution_same_size_output(s_w4, 2)
+                s_h16, s_w16 = convolution_same_size_output(s_h8, 2), convolution_same_size_output(s_w8, 2)
+
+                # projection of z and reshaping
+                h0 = tf.reshape(linear(z, self.gen_filters_conv1*8*s_h16*s_w16, 'gen_h0_lin'), [-1, s_h16, s_w16, self.gen_filters_conv1 * 8])
+                h0 = tf.nn.relu(self.gen_bn0(h0, train=False))
+                h1 = deconv2d(h0, [self.batch_size, s_h8, s_w8, self.gen_filters_conv1*4], name='gen_h1')
+                h1 = tf.nn.relu(self.gen_bn1(h1, train=False))
+                h2 = deconv2d(h1, [self.batch_size, s_h4, s_w4, self.gen_filters_conv1*2], name='gen_h2')
+                h2 = tf.nn.relu(self.gen_bn2(h2, train=False))
+                h3 = deconv2d(h2, [self.batch_size, s_h2, s_w2, self.gen_filters_conv1*1], name='gen_h3')
+                h3 = tf.nn.relu(self.gen_bn3(h3, train=False))
+                h4 = deconv2d(h3, [self.batch_size, s_h, s_w, self.image_color_dim], name='gen_h4')
+                return tf.nn.tanh(h4)
+
+            else:
+                s_h, s_w = self.output_image_height, self.output_image_width
+                s_h2, s_h4 = int(s_h/2), int(s_h/4)
+                s_w2, s_w4 = int(s_w/2), int(s_w/4)
+                yb = tf.reshape(y, [self.batch_size, 1, 1, self.y_dim])
+                z = concatenate([z, y], 1)
+                h0 = tf.nn.relu(self.gen_bn0(linear(z, self.gen_units_ful_con_layer, 'gen_h0_lin'), train=False))
+                h0 = concatenate([h0, y], 1)
+                h1 = tf.nn.relu(self.gen_bn1(linear(h0, self.gen_filters_conv1*2*s_h4*s_w4, 'gen_h1_lin'), train=False))
+                h1 = tf.reshape(h1, [self.batch_size, s_h4, s_w4, self.gen_filters_conv1 * 2])
+                h1 = concatenate_conditioning_vector(h1, yb)
+                h2 = tf.nn.relu(self.gen_bn2(deconv2d(h1, [self.batch_size, s_h2, s_w2, self.gen_filters_conv1 * 2], name='gen_h2'), train=False))
+                h2 = concatenate_conditioning_vector(h2, yb)
+                return tf.nn.sigmoid(deconv2d(h2, [self.batch_size, s_h, s_w, self.image_color_dim], name='gen_h3'))
+
 
