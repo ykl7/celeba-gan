@@ -53,6 +53,8 @@ class DCGAN (object):
             self.gen_bn3 = Batch_Normalization(name='gen_bn3')
 
         self.dataset = dataset
+        # Server data path
+        # self.data = glob(os.path.join("/Neutron9/yash.lal/data", self.dataset, self.input_file_pattern))
         self.data = glob(os.path.join("./data", self.dataset, self.input_file_pattern))
         self.checkpoint_directory = checkpoint_directory
 
