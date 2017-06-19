@@ -258,7 +258,7 @@ class DCGAN (object):
             batch_z = np.random.uniform(-1, 1, [config.batch_size, self.z_dim]).astype(np.float32)
 
             # Discriminator update
-            _, summary_string = self.session.run([dis_optimizer, self.summation_D], feed_dict={ self.inputs: batch_images, self.z: batch_z })
+            _, summary_string = self.session.run([dis_optimizer, self.summation_D], feed_dict={ self.real_images: batch_images, self.z: batch_z })
             self.summary_writer.add_summary(summary_string, counter)
 
             # Generator update
@@ -270,7 +270,7 @@ class DCGAN (object):
             # self.summary_writer.add_summary(summary_string, counter)
 
             errD_fake = self.dis_loss_fake.eval({ self.z: batch_z })
-            errD_real = self.dis_loss_real.eval({ self.inputs: batch_images })
+            errD_real = self.dis_loss_real.eval({ self.real_images: batch_images })
             errG = self.gen_loss.eval({self.z: batch_z})
 
             counter += 1
@@ -281,7 +281,7 @@ class DCGAN (object):
                     samples, dis_loss, gen_loss = self.session.run([self.sampler, self.dis_loss, self.gen_loss],
                         feed_dict={
                             self.z: sample_z,
-                            self.inputs: sample_inputs,
+                            self.real_images: sample_inputs,
                         },
                     )
                     manifold_height = int(np.ceil(np.sqrt(samples.shape[0])))
