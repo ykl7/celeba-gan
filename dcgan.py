@@ -57,6 +57,30 @@ class DCGAN (object):
 
         self.create_architecture()
 
+    def discriminator(self, image, y=None, reuse=False):
+        with tf.variable_scope("discriminator") as scope:
+            if reuse:
+                scope.reuse_variables()
+            if not self.y_dim:
+                h0 = leaky_relu(conv2d(image, self.dis_filters_conv1, name='dis_h0_conv'))
+                h1 = leaky_relu(self.d_bn1(conv2d(h0, self.dis_filters_conv1*2, name='dis_h1_conv')))
+                h2 = leaky_relu(self.d_bn2(conv2d(h1, self.dis_filters_conv1*4, name='dis_h2_conv')))
+                h3 = leaky_relu(self.d_bn3(conv2d(h2, self.dis_filters_conv1*8, name='dis_h3_conv')))
+                h4 = linear(tf.reshape(h3, [self.batch_size, -1]), 1, 'dis_h3_lin')
+                return tf.nn.sigmoid(h4), h4
+            else:
+                yb = tf.reshape(y, [self.batch_size, 1, 1, self.y_dim])
+                x = concatenate_conditioning_vector(image, yb)
+                h0 = leaky_relu(conv2d(x, self.image_color_dim + self.y_dim, name='dis_h0_conv'))
+                h0 = concatenate_conditioning_vector(h0, yb)
+                h1 = leaky_relu(self.d_bn1(conv2d(h0, self.dis_filters_conv1 + self.y_dim, name='dis_h1_conv')))
+                h1 = tf.reshape(h1, [self.batch_size, -1])      
+                h1 = concatenate([h1, y], 1)
+                h2 = leaky_relu(self.d_bn2(linear(h1, self.dis_units_ful_con_layer, 'dis_h2_lin')))
+                h2 = concatenate([h2, y], 1)
+                h3 = linear(h2, 1, 'dis_h3_lin')
+                return tf.nn.sigmoid(h3), h3
+
     def create_architecture(self):
         if self.y_dim:
             self.y = tf.placeholder(tf.float32, [self.batch_size, self.y_dim], name='y')
@@ -191,4 +215,5 @@ class DCGAN (object):
 
             if np.mod(counter, 500) == 2:
                 self.save(config.checkpoint_directory, counter)
+
 
