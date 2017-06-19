@@ -1,8 +1,12 @@
 import os
 import time
+import re
+import math
 
 import tensorflow as tf
+import numpy as np
 
+from six.moves import xrange
 from glob import glob
 from __future__ import division
 
@@ -59,6 +63,32 @@ class DCGAN (object):
         self.grayscale = (self.image_color_dim == 1)
 
         self.create_architecture()
+
+    @property
+    def model_directory(self):
+        return "{}_{}_{}_{}".format(self.dataset, self.batch_size, self.output_image_height, self.output_image_width)
+
+    def save(self, checkpoint_directory, step):
+        model_name = "celebA-dcgan.model"
+        checkpoint_directory = os.path.join(checkpoint_directory, self.model_directory)
+
+        if not os.path.exists(checkpoint_directory):
+            os.makedirs(checkpoint_directory)
+        self.saver.save(self.session, os.path.join(checkpoint_directory, model_name), global_step=step)
+
+    def load(self, checkpoint_directory):
+        print("Reading checkpoints")
+        checkpoint_directory = os.path.join(checkpoint_directory, self.model_directory)
+        checkpoint = tf.train.get_checkpoint_state(checkpoint_directory)
+        if checkpoint and checkpoint.model_checkpoint_path:
+            checkpoint_name = os.path.basename(checkpoint.model_checkpoint_path)
+            self.saver.restore(self.session, os.path.join(checkpoint_directory, checkpoint_name))
+            counter = int(next(re.finditer("(\d+)(?!.*\d)",checkpoint_name)).group(0))
+            print("Success finding {}".format(checkpoint_name))
+            return True, counter
+        else:
+            print("Failed to find checkpoint")
+            return False, 0
 
     def discriminator(self, image, y=None, reuse=False):
         with tf.variable_scope("discriminator") as scope:
