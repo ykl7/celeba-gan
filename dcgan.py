@@ -57,8 +57,8 @@ class DCGAN (object):
 
         self.dataset = dataset
         # Server data path
-        self.data = glob(os.path.join("/Neutron9/yash.lal/data", self.dataset, self.input_file_pattern))
-        # self.data = glob(os.path.join("./data", self.dataset, self.input_file_pattern))
+        # self.data = glob(os.path.join("/Neutron9/yash.lal/data", self.dataset, self.input_file_pattern))
+        self.data = glob(os.path.join("./data", self.dataset, self.input_file_pattern))
         self.checkpoint_directory = checkpoint_directory
 
         imreadImg = imread(self.data[0]);
@@ -242,8 +242,8 @@ class DCGAN (object):
 
         for epoch in xrange(config.epoch):
             # Server data path
-            self.data = glob(os.path.join("/Neutron9/yash.lal/data", self.dataset, self.input_file_pattern))
-            # self.data = glob(os.path.join("./data", config.dataset, self.input_file_pattern))
+            # self.data = glob(os.path.join("/Neutron9/yash.lal/data", self.dataset, self.input_file_pattern))
+            self.data = glob(os.path.join("./data", config.dataset, self.input_file_pattern))
             batch_idxs = min(len(self.data), config.train_size) // config.batch_size
 
             for idx in xrange(0, batch_idxs):

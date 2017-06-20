@@ -49,3 +49,25 @@
 20/06/2017 11:17:56 PM Epoch: [15] [3164/3165] time: 23671.2327, dis_loss: 0.84580153, gen_loss: 0.72293770
 20/06/2017 11:26:33 PM Epoch: [23] [3164/3165] time: 33856.1801, dis_loss: 0.02465805, gen_loss: 8.36336136
 20/06/2017 11:42:35 PM Epoch: [16] [3164/3165] time: 25150.9488, dis_loss: 0.01024794, gen_loss: 15.59198189
+20/06/2017 11:50:15 PM None
+20/06/2017 11:52:45 PM None
+20/06/2017 11:53:54 PM None
+20/06/2017 11:53:56 PM Reading checkpoints
+20/06/2017 11:53:56 PM Restoring parameters from checkpoint/celebA_64_64_64/celebA-dcgan.model-2
+20/06/2017 11:53:56 PM Success finding celebA-dcgan.model-2
+20/06/2017 11:55:18 PM None
+20/06/2017 11:55:20 PM Reading checkpoints
+20/06/2017 11:55:20 PM Restoring parameters from checkpoint/celebA_64_64_64/celebA-dcgan.model-2
+20/06/2017 11:55:20 PM Success finding celebA-dcgan.model-2
+20/06/2017 11:57:35 PM None
+20/06/2017 11:57:38 PM Reading checkpoints
+20/06/2017 11:57:38 PM Restoring parameters from checkpoint/celebA_64_64_64/celebA-dcgan.model-2
+20/06/2017 11:57:39 PM Success finding celebA-dcgan.model-2
+20/06/2017 11:58:30 PM None
+20/06/2017 11:58:32 PM Reading checkpoints
+20/06/2017 11:58:32 PM Restoring parameters from checkpoint/celebA_64_64_64/celebA-dcgan.model-2
+20/06/2017 11:58:33 PM Success finding celebA-dcgan.model-2
+20/06/2017 11:58:50 PM None
+20/06/2017 11:58:52 PM Reading checkpoints
+20/06/2017 11:58:52 PM Restoring parameters from checkpoint/celebA_64_64_64/celebA-dcgan.model-2
+20/06/2017 11:58:52 PM Success finding celebA-dcgan.model-2

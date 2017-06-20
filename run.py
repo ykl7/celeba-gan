@@ -6,7 +6,7 @@ import numpy as np
 import tensorflow as tf
 
 from dcgan import DCGAN
-from utils import pp, show_all_variables
+from utils import pp, show_all_variables, visualize
 
 flags = tf.app.flags
 flags.DEFINE_integer("epoch", 25, "Number of epochs to train for")
@@ -51,12 +51,12 @@ def main(_):
         if FLAGS.train:
             dcgan.train(FLAGS)
         else:
-            if not dcgan.load(FLAGS.checkpoint_dir)[0]:
+            if not dcgan.load(FLAGS.checkpoint_directory)[0]:
                 raise Exception("No pre-trained model exists")
 
         # visualization activation for Alec Radford's utils.py function - does not work since not implemented (and no idea how to)
-        # OPTION = 1
-        # visualize(sess, dcgan, FLAGS, OPTION)
+        OPTION = 1
+        visualize(session, dcgan, FLAGS, OPTION)
 
 if __name__ == '__main__':
     tf.app.run()
